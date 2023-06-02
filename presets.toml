@@ -1,0 +1,18 @@
+# The following comment represents the format you should use for your preset parameters:
+
+# [title]
+# param1 = int
+# param2 = str
+# param3 = int
+
+# Parameters should match their respective flags. You do not have to define every parameter.
+
+# Two examples I used personally:
+
+[Learning-Irish-Phrases]
+speed = 0.85
+emptyspace = 800
+
+[Learning-Irish-Texts]
+speed = 0.9
+emptyspace = 800

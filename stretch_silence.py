@@ -3,6 +3,7 @@
 from pydub import AudioSegment, silence
 from audiotsm import phasevocoder
 from audiotsm.io.wav import WavReader, WavWriter
+import tomllib
 import argparse
 
 parser = argparse.ArgumentParser(
@@ -10,12 +11,12 @@ parser = argparse.ArgumentParser(
     description='A little CLI widget intended to slow and add space to various forms of language-learning audio files, which often feel rushed to newcomers. Thank you to the creators of PyDub and AudioTSM, upon which this program sits.',
     epilog='Happy learning!')
 parser.add_argument('infile', type=argparse.FileType('r'), help="The sound file to be processed. Accepts any ffmpeg filetype.")
-parser.add_argument('-d, --outfile', type=argparse.FileType('w'), help="Where you want the processed audio to be saved. Defaults to the same location as your input file.")
+parser.add_argument('-d', '--outfile', type=argparse.FileType('w'), help="Where you want the processed audio to be saved. Defaults to the same location as your input file.")
 parser.add_argument('-s', '--speed', type=float, help="Speed for the new audio, relative to the original.")
 parser.add_argument('-t', '--type', type=str, help="The filetype you wish to the save your processed audio in. Accepts any ffmpeg filetype and defaults to the same type as the input.")
 parser.add_argument('-e', '--emptyspace', default=0, type=int, help='Amount of empty space you would like between sounds, in milliseconds.')
 parser.add_argument('-b', '--boundthreshold', default=-16, type=int, help='Volume threshold, in dB, to define as "silence" for the purpose of deciding where to add more space. Try bumping up if your results are not sensitive enough. Defaults to -16 dB.')
-parser.add_argument('-p', '--preset', type=str, help='Load a set of predefined parameters, identified with a title of your choosing, defined in presets.toml, to process your audio using. Helpful if you find yourself processing many audio files with similar thresholds and changes.')
+parser.add_argument('-p', '--preset', type=str, help='Load a set of predefined parameters, identified with a name of your choosing and defined in presets.toml, to process your audio with. Helpful if you find yourself processing many audio files with similar thresholds and requirements.')
 
 def change_speed(input, output, speed=1.0):
     # Saves output temporarily in the user-defined output location for further changes, if necessary
@@ -34,6 +35,13 @@ def add_space(input, space, bounds):
         clip_with_space += segment + base_silence
 
     return clip_with_space
+
+def get_presets(name):
+    with open('presets.toml', 'r') as f:
+        presets = tomllib.load(f)
+    params = presets[name]
+
+    return params
 
 
 # def process_vocab():
