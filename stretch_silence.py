@@ -16,7 +16,7 @@ parser.add_argument('-s', '--speed', type=float, help="Speed for the new audio, 
 parser.add_argument('-t', '--type', type=str, help="The filetype you wish to the save your processed audio in. Accepts any ffmpeg filetype and defaults to the same type as the input.")
 parser.add_argument('-e', '--emptyspace', default=0, type=int, help='Amount of empty space you would like between sounds, in milliseconds.')
 parser.add_argument('-b', '--boundthreshold', default=-16, type=int, help='Volume threshold, in dB, to define as "silence" for the purpose of deciding where to add more space. Try bumping up if your results are not sensitive enough. Defaults to -16 dB.')
-parser.add_argument('-p', '--preset', type=str, help='Load a set of predefined parameters, identified with a name of your choosing and defined in presets.toml, to process your audio with. Helpful if you find yourself processing many audio files with similar thresholds and requirements.')
+parser.add_argument('-p', '--preset', type=str, help='Load a set of predefined parameters, as defined in presets.toml. Helpful if you find yourself processing many audio files with similar thresholds and requirements.')
 
 def change_speed(input, output, speed=1.0):
     # Saves output temporarily in the user-defined output location for further changes, if necessary
