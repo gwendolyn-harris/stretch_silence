@@ -1,0 +1,15 @@
+# pyproject.toml
+
+[build-system]
+requires = ["pydub>=0.25.1", "audiotsm==0.1.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stretch_silence"
+version = "0.0.1"
+description = "A little CLI widget intended to slow and add space to various forms of language-learning audio files, which often feel rushed to newcomers."
+readme = "README.md"
+authors = [{ name = "Gwendolyn Harris", email = "scrupulous.imp@gmail.com" }]
+
+[project.scripts]
+stretch_silence = "stretch_silence.__main__:main"

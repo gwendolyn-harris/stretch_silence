@@ -43,6 +43,10 @@ def get_presets(name):
 
     return params
 
+if __name__ == "__main__":
+    pass
+
+
 
 # def process_vocab():
 #     clip = AudioSegment.from_mp3("Downloads/Lesson 2.mp3")
