@@ -5,6 +5,7 @@ from audiotsm import phasevocoder
 from audiotsm.io.wav import WavReader, WavWriter
 import tomllib
 import argparse
+import os
 
 parser = argparse.ArgumentParser(
     prog='Stretch and Add Silence',
@@ -18,14 +19,14 @@ parser.add_argument('-e', '--emptyspace', default=0, type=int, help='Amount of e
 parser.add_argument('-b', '--boundthreshold', default=-16, type=int, help='Volume threshold, in dB, to define as "silence" for the purpose of deciding where to add more space. Try bumping up if your results are not sensitive enough. Defaults to -16 dB.')
 parser.add_argument('-p', '--preset', type=str, help='Load a set of predefined parameters, as defined in presets.toml. Helpful if you find yourself processing many audio files with similar thresholds and requirements.')
 
-def change_speed(input, output, speed=1.0):
+def change_speed(input: str, output: str, speed: int=1.0):
     # Saves output temporarily in the user-defined output location for further changes, if necessary
     with WavReader(input) as reader:
         with WavWriter(output, reader.channels,reader.samplerate) as writer:
             tsm = phasevocoder(reader.channels, speed=speed)
             tsm.run(reader, writer)
 
-def add_space(input, space, bounds):
+def add_space(input: str, space: int, bounds: int) -> AudioSegment:
     clip = AudioSegment.from_file(input)
     clip_split = silence.split_on_silence(clip, 600, bounds, 100)
     base_silence = AudioSegment.silent(space)
@@ -36,15 +37,51 @@ def add_space(input, space, bounds):
 
     return clip_with_space
 
-def get_presets(name):
+def get_presets(name: str):
     with open('presets.toml', 'r') as f:
         presets = tomllib.load(f)
     params = presets[name]
 
     return params
 
+class Args:
+    def __init__(self, infile: str, outfile: str, speed: int, type, emptyspace, boundthreshold, preset):
+        self.infile = infile
+        self.outifle = outfile
+        self.speed = speed
+        self.type = type
+        self.emptyspace = emptyspace
+        self.boundthreshold = boundthreshold
+        self.preset = preset
+
+def main():
+    parser = argparse.ArgumentParser(
+    prog='Stretch and Add Silence',
+    description='A little CLI widget intended to slow and add space to various forms of language-learning audio files, which often feel rushed to newcomers. Thank you to the creators of PyDub and AudioTSM, upon which this program sits.',
+    epilog='Happy learning!')
+    parser.add_argument('infile', type=argparse.FileType('r'), help="The sound file to be processed. Accepts any ffmpeg filetype.")
+    parser.add_argument('-d', '--outfile', type=argparse.FileType('w'), help="Where you want the processed audio to be saved. Defaults to the same location as your input file.")
+    parser.add_argument('-s', '--speed', type=float, help="Speed for the new audio, relative to the original.")
+    parser.add_argument('-t', '--type', type=str, help="The filetype you wish to the save your processed audio in. Accepts any ffmpeg filetype and defaults to the same type as the input.")
+    parser.add_argument('-e', '--emptyspace', type=int, help='Amount of empty space you would like between sounds, in milliseconds.')
+    parser.add_argument('-b', '--boundthreshold', default=-16, type=int, help='Volume threshold, in dB, to define as "silence" for the purpose of deciding where to add more space. Try bumping up if your results are not sensitive enough. Defaults to -16 dB.')
+    parser.add_argument('-p', '--preset', type=str, help='Load a set of predefined parameters, as defined in presets.toml. Helpful if you find yourself processing many audio files with similar thresholds and requirements.')
+
+    args = parser.parse_args()
+
+    if not args.outfile:
+        args.outfile = os.path.dirname(args.infile)
+
+    if args.preset:
+        params = get_presets(args.preset)
+
+    if args.speed:
+        change_speed(args.infile, args.outfile, args.speed)
+
+        args.infile = args.outfiles
+
 if __name__ == "__main__":
-    pass
+    main()
 
 
 
