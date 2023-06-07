@@ -19,7 +19,7 @@ parser.add_argument('-e', '--emptyspace', default=0, type=int, help='Amount of e
 parser.add_argument('-b', '--boundthreshold', default=-16, type=int, help='Volume threshold, in dB, to define as "silence" for the purpose of deciding where to add more space. Try bumping up if your results are not sensitive enough. Defaults to -16 dB.')
 parser.add_argument('-p', '--preset', type=str, help='Load a set of predefined parameters, as defined in presets.toml. Helpful if you find yourself processing many audio files with similar thresholds and requirements.')
 
-def change_speed(input: str, output: str, speed: int=1.0):
+def change_speed(input: str, output: str, type: str, speed: int=1.0):
     # Saves output temporarily in the user-defined output location for further changes, if necessary
     with WavReader(input) as reader:
         with WavWriter(output, reader.channels,reader.samplerate) as writer:
@@ -44,16 +44,6 @@ def get_presets(name: str):
 
     return params
 
-class Args:
-    def __init__(self, infile: str, outfile: str, speed: int, type, emptyspace, boundthreshold, preset):
-        self.infile = infile
-        self.outifle = outfile
-        self.speed = speed
-        self.type = type
-        self.emptyspace = emptyspace
-        self.boundthreshold = boundthreshold
-        self.preset = preset
-
 def main():
     parser = argparse.ArgumentParser(
     prog='Stretch and Add Silence',
@@ -68,17 +58,27 @@ def main():
     parser.add_argument('-p', '--preset', type=str, help='Load a set of predefined parameters, as defined in presets.toml. Helpful if you find yourself processing many audio files with similar thresholds and requirements.')
 
     args = parser.parse_args()
+    my_args = vars(args)
 
-    if not args.outfile:
-        args.outfile = os.path.dirname(args.infile)
+    if "outfile" not in my_args:
+        my_args["outfile"] = os.path.dirname(my_args["infile"])
 
-    if args.preset:
-        params = get_presets(args.preset)
+    if "type" not in my_args:
+        my_args["type"] = os.path.splittext(my_args["infile"])[1]
 
-    if args.speed:
-        change_speed(args.infile, args.outfile, args.speed)
+    if "preset" in my_args:
+        params = get_presets(my_args["preset"])
+        for k, v in params:
+            my_args[k] = v
 
-        args.infile = args.outfiles
+    if "speed" in my_args:
+        change_speed(my_args["infile"], my_args["outfile"], my_args["speed"])
+        my_args["infile"] = my_args["outfile"]
+
+    if "emptyspace" in my_args:
+        output = add_space(my_args["infile"], my_args["emptyspace"], my_args["boundthreshold"])
+        output.export(my_args["outfile"], format=my_args["type"])
+
 
 if __name__ == "__main__":
     main()
