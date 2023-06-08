@@ -7,24 +7,22 @@ import tomllib
 import argparse
 import os
 
-parser = argparse.ArgumentParser(
-    prog='Stretch and Add Silence',
-    description='A little CLI widget intended to slow and add space to various forms of language-learning audio files, which often feel rushed to newcomers. Thank you to the creators of PyDub and AudioTSM, upon which this program sits.',
-    epilog='Happy learning!')
-parser.add_argument('infile', type=argparse.FileType('r'), help="The sound file to be processed. Accepts any ffmpeg filetype.")
-parser.add_argument('-d', '--outfile', type=argparse.FileType('w'), help="Where you want the processed audio to be saved. Defaults to the same location as your input file.")
-parser.add_argument('-s', '--speed', type=float, help="Speed for the new audio, relative to the original.")
-parser.add_argument('-t', '--type', type=str, help="The filetype you wish to the save your processed audio in. Accepts any ffmpeg filetype and defaults to the same type as the input.")
-parser.add_argument('-e', '--emptyspace', default=0, type=int, help='Amount of empty space you would like between sounds, in milliseconds.')
-parser.add_argument('-b', '--boundthreshold', default=-16, type=int, help='Volume threshold, in dB, to define as "silence" for the purpose of deciding where to add more space. Try bumping up if your results are not sensitive enough. Defaults to -16 dB.')
-parser.add_argument('-p', '--preset', type=str, help='Load a set of predefined parameters, as defined in presets.toml. Helpful if you find yourself processing many audio files with similar thresholds and requirements.')
-
 def change_speed(input: str, output: str, type: str, speed: int=1.0):
     # Saves output temporarily in the user-defined output location for further changes, if necessary
+    if os.path.splittext(input)[1] != ".wav":
+        filetype = os.path.splittext(input)[1]
+        sound = AudioSegment.from_file(input)
+        sound.export(output, format="wav")
+        input = output
+
     with WavReader(input) as reader:
         with WavWriter(output, reader.channels,reader.samplerate) as writer:
             tsm = phasevocoder(reader.channels, speed=speed)
             tsm.run(reader, writer)
+
+    if type != "wav":
+        sound = AudioSegment.from_wav(output)
+        sound.export(output, format=type)
 
 def add_space(input: str, space: int, bounds: int) -> AudioSegment:
     clip = AudioSegment.from_file(input)
@@ -46,9 +44,9 @@ def get_presets(name: str):
 
 def main():
     parser = argparse.ArgumentParser(
-    prog='Stretch and Add Silence',
-    description='A little CLI widget intended to slow and add space to various forms of language-learning audio files, which often feel rushed to newcomers. Thank you to the creators of PyDub and AudioTSM, upon which this program sits.',
-    epilog='Happy learning!')
+        prog='Stretch and Add Silence',
+        description='A little CLI widget intended to slow and add space to various forms of language-learning audio files, which often feel rushed to newcomers. Thank you to the creators of PyDub and AudioTSM, upon which this program sits.',
+        epilog='Happy learning!')
     parser.add_argument('infile', type=argparse.FileType('r'), help="The sound file to be processed. Accepts any ffmpeg filetype.")
     parser.add_argument('-d', '--outfile', type=argparse.FileType('w'), help="Where you want the processed audio to be saved. Defaults to the same location as your input file.")
     parser.add_argument('-s', '--speed', type=float, help="Speed for the new audio, relative to the original.")
