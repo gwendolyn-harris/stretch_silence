@@ -25,13 +25,15 @@ def change_speed(input: str, output: str, type: str, speed: int=1.0):
         sound.export(output, format=type)
 
 def add_space(input: str, space: int, bounds: int) -> AudioSegment:
+    print(input)
     clip = AudioSegment.from_file(input)
-    clip_split = silence.split_on_silence(clip, 600, bounds, 100)
+    clip_split = silence.split_on_silence(clip, 600, bounds, 300, 100)
+    print(len(clip_split))
     base_silence = AudioSegment.silent(space)
 
     clip_with_space = base_silence
     for segment in clip_split:
-        clip_with_space += segment + base_silence
+        clip_with_space += (segment + base_silence)
 
     return clip_with_space
 
@@ -52,7 +54,7 @@ def main():
     parser.add_argument('-s', '--speed', type=float, help="Speed for the new audio, relative to the original.")
     parser.add_argument('-t', '--type', type=str, help="The filetype you wish to the save your processed audio in. Accepts any ffmpeg filetype and defaults to the same type as the input.")
     parser.add_argument('-e', '--emptyspace', type=int, help='Amount of empty space you would like between sounds, in milliseconds.')
-    parser.add_argument('-b', '--boundthreshold', default=-16, type=int, help='Volume threshold, in dB, to define as "silence" for the purpose of deciding where to add more space. Try bumping up if your results are not sensitive enough. Defaults to -16 dB.')
+    parser.add_argument('-b', '--boundthreshold', default=-20, type=int, help='Volume threshold, in dB, to define as "silence" for the purpose of deciding where to add more space. Try bumping up if your results are not sensitive enough. Defaults to -16 dB.')
     parser.add_argument('-p', '--preset', type=str, help='Load a set of predefined parameters, as defined in presets.toml. Helpful if you find yourself processing many audio files with similar thresholds and requirements.')
 
     args = parser.parse_args()
