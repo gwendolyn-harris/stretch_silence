@@ -24,10 +24,10 @@ def change_speed(input: str, output: str, type: str, speed: int=1.0):
         sound = AudioSegment.from_wav(output)
         sound.export(output, format=type)
 
-def add_space(input: str, space: int, bounds: int) -> AudioSegment:
+def add_space(input: str, space: int, minsilence: int, bounds: int) -> AudioSegment:
     print(input)
     clip = AudioSegment.from_file(input)
-    clip_split = silence.split_on_silence(clip, 600, bounds, 300, 100)
+    clip_split = silence.split_on_silence(clip, min_silence_len=minsilence, silence_thresh=bounds, keep_silence=100, seek_step=1)
     print(len(clip_split))
     base_silence = AudioSegment.silent(space)
 
@@ -55,6 +55,7 @@ def main():
     parser.add_argument('-t', '--type', type=str, help="The filetype you wish to the save your processed audio in. Accepts any ffmpeg filetype and defaults to the same type as the input.")
     parser.add_argument('-e', '--emptyspace', type=int, help='Amount of empty space you would like between sounds, in milliseconds.')
     parser.add_argument('-b', '--boundthreshold', default=-20, type=int, help='Volume threshold, in dB, to define as "silence" for the purpose of deciding where to add more space. Try bumping up if your results are not sensitive enough. Defaults to -16 dB.')
+    parser.add_argument('-m', '--minsilence', type=int, default=200, help="Length of silence, in milliseconds, to be considered 'silence' for the purpose of adding more space. Defaults to 200 ms.")
     parser.add_argument('-p', '--preset', type=str, help='Load a set of predefined parameters, as defined in presets.toml. Helpful if you find yourself processing many audio files with similar thresholds and requirements.')
 
     args = parser.parse_args()
@@ -80,7 +81,7 @@ def main():
         my_args["infile"] = my_args["outfile"]
 
     if my_args["emptyspace"]:
-        output = add_space(my_args["infile"], my_args["emptyspace"], my_args["boundthreshold"])
+        output = add_space(my_args["infile"], my_args["emptyspace"], my_args["minsilence"], my_args["boundthreshold"])
         output.export(my_args["outfile"], format=my_args["type"])
 
 
