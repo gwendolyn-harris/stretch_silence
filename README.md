@@ -1,6 +1,4 @@
-### Heading
-
-Stretch_Silence
+### Stretch_Silence
 
 This is a quick, easy-to-use CLI created in order to make adjusting language-learning audio files, which often feature a variety of native speakers and thus remain of value to a well-rounded language-learning experience.
 
